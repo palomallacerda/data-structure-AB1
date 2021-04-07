@@ -1,4 +1,4 @@
-#define TAM 5
+#define TAM 10
 
 typedef struct object {
     int id;
@@ -10,11 +10,14 @@ typedef struct fila {
     int last;
 } fila;
 
+// mostra o menu
+void handleMenu ();
+
 // troca a prioridade do ID selecionado
 void changeweight (fila *q, int id, int priority);
 
 // remove a raíz atual da fila
-int dequeue(fila *novo);
+void dequeue(fila *novo);
 
 // retorna o index do filho a esquerda
 int getLeft (int i);
@@ -36,3 +39,8 @@ fila *start();
 
 // função que printa a estrutura no terminal
 void display(fila  *q, int i);
+
+// verifica se não há inconsistências na max-heap
+void buildHeap (fila *f, int sz);
+
+fila * max_heapify (fila *f, int i);

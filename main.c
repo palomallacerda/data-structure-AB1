@@ -8,20 +8,17 @@ int main(){
     int id, priori, op, newId, newPriori;
 
     while (1){
-        puts("------------------------- BEM VINDE -----------------------");
-        puts(" 0 - sair\n 1 - adicionar\n 2 - remover\n 3 - alterar prioridade\n 4 - mostrar");
+        handleMenu();
         scanf("%d", &op);
         if (op==0) break;
         if (op==1){
-            puts("Diz qual é o id e a prioridade:");
+            puts("Insira [ID] [PRIORIDADE]:");
             scanf("%d %d", &id, &priori);
             enqueue(id, priori, novo);
-            puts("adicionado com sucesso");
-            puts("");
         }else if (op==2){
             dequeue(novo);
         }else if (op==3){
-            puts("Insira o id e a nova prioridade: ");
+            puts("Insira o [ID] e a nova [PRIORIDADE]:");
             scanf("%d %d", &newId, &newPriori);
             changeweight(novo, newId, newPriori);
         }else if (op==4){
@@ -29,6 +26,19 @@ int main(){
         }
     }
     return 0;
+}
+
+void handleMenu (){
+    puts("+------------------------+");
+    puts("|  Escolha uma opção     |");
+    puts("+------------------------+");
+    puts("| 0 - sair               |");
+    puts("| 1 - adicionar          |");
+    puts("| 2 - remover            |");
+    puts("| 3 - alterar prioridade |");
+    puts("| 4 - mostrar            |");
+    puts("+------------------------+");
+    printf("|-> ");
 }
 
 void changeweight(fila *q, int id, int priority)
@@ -49,14 +59,14 @@ void changeweight(fila *q, int id, int priority)
             {
                 printf("Prioridade %d será substituida por %d\n", q->queue[i]->priority, priority);
                 q->queue[i]->priority = priority;
+                buildHeap(q, q->last+1);
+                puts("-------------- Substituído com sucesso!\n");
                 return;
     
             } 
             i++; 
         }
-    
-        puts("Substituido com sucesso\n");
-    
+        
     }
     
 }
@@ -105,7 +115,7 @@ void enqueue(int id, int priority, fila *novo){
 
     if(novo->last + 1 == TAM){
 
-      puts("Topado, já era.");
+        puts("-------------- ! FILA CHEIA !");
 
     } else {
 
@@ -123,6 +133,8 @@ void enqueue(int id, int priority, fila *novo){
             father = indexPai(ultimo);
 
         }
+        buildHeap(novo, novo->last);
+        puts("-------------- Adicionado com sucesso!");
     }
 }
    
@@ -134,41 +146,42 @@ int getLeft (int i){ /*ultimo valor da esquerda*/
     return (2*1)+1;
 }
 
-int dequeue(fila *novo){
+void dequeue (fila *novo){
     if (novo->last==-1){
-        puts("FILA VAZIA");
+        puts("-------------- ! FILA VAZIA !");
     }else{
         printf("ID do Removido = %d | Prioridade = %d\n", novo->queue[0]->id, novo->queue[0]->priority);
-        int leftRoot = getLeft(0);
-        int rightRoot = getRight(0);
-        
-        if (novo->queue[leftRoot]!=NULL){ // raíz possui filhos a esquerda
-            int aux_left = getLeft(leftRoot);
-            int aux_right = getRight(leftRoot);
-
-            trocaValores(novo->queue[leftRoot], novo->queue[0]);
-
-            object *rightSon, *leftSon;
-
-            if(aux_left < aux_right){
-              
-              rightSon = novo->queue[aux_right];
-              trocaValores(rightSon, novo->queue[rightRoot]);
-            }
-            else{
-                
-               leftSon = novo->queue[aux_left]; 
-               trocaValores(leftSon, novo->queue[leftRoot]); 
-            }
-
-            
-        }else if (novo->queue[rightRoot]!=NULL){  //raiz possui filhos a direita
-            
-        }else{ // raíz é o único no array
-            novo->queue[0]->id = -1;
-            novo->queue[0]->priority = -1;
-        }
+        trocaValores(novo->queue[0], novo->queue[novo->last]);
         novo->last--;
+        if (novo->last>0){
+            novo = max_heapify(novo, 0);
+            display(novo, 0);
+        }else{
+            novo->queue[0]->id = 0;
+            novo->queue[0]->priority = 0;
+        }
+    }
+}
+ 
+void buildHeap (fila *f, int sz){
+    int lastNode = sz/2;
+    int j;
+    for (j=lastNode; j>=0; j--){
+        max_heapify(f, j);
     }
 }
 
+fila * max_heapify (fila *f, int i){
+    int largest = i, left = getLeft(i), right = getRight(i);
+    if (left<f->last+1 && f->queue[left]->priority > f->queue[largest]->priority){
+        largest = left;
+    }else if (right<f->last+1 && f->queue[right]->priority > f->queue[largest]->priority){
+        largest = right;
+    }
+    if (largest!=i){
+        //printf("===== Menor %d Maior %d\n", f->queue[i]->priority, f->queue[largest]->priority);
+        trocaValores(f->queue[i], f->queue[largest]); 
+        max_heapify(f, largest);
+    }
+    else return f;
+}
